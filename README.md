@@ -77,6 +77,37 @@ What makes this more than a chatbot is the **production infrastructure** around 
 
 ---
 
+## Screenshots
+
+### Chat Interface
+The customer-facing web interface with real-time streaming responses. The agent recognizes returning customers through persistent memory and uses tools to look up product information and return policies.
+
+![Chat UI — Product catalog lookup](images/chat-ui-products.png)
+
+![Chat UI — Return policy query](images/chat-ui-return-policy.png)
+
+### Observability — Trace Waterfall
+End-to-end distributed trace showing every span in a single agent invocation: model calls to Claude Sonnet 4.6, memory retrieval, tool execution via the Gateway (warranty check, return policy), and event logging — all with timing data.
+
+![Trace timeline waterfall](images/trace-timeline-waterfall.png)
+
+### Deployed Runtimes
+Three runtimes deployed on AgentCore: the primary CustomerSupport agent (Version 11), the A/B testing variant, and the zero-code Harness agent — all in Ready state.
+
+![Runtimes overview](images/runtimes-overview.png)
+
+### Gateway Tool Routing
+The AgentCore Gateway with three targets: Lambda-backed warranty check and refund processing tools, plus an HTTP runtime target for A/B testing traffic.
+
+![Gateway targets](images/gateway-targets.png)
+
+### Continuous Evaluation
+Two online evaluation configurations monitoring agent quality: QualityMonitor (GoalSuccessRate, Correctness, ToolSelectionAccuracy) and ABQualityMonitor for A/B testing.
+
+![Evaluation configurations](images/evaluation-configurations.png)
+
+---
+
 ## Project Structure
 
 ```

@@ -294,7 +294,7 @@
                             if (data === "[DONE]") continue;
                             try {
                                 const parsed = JSON.parse(data);
-                                const chunk = parsed.data || parsed.text || parsed.content || data;
+                                const chunk = typeof parsed === "string" ? parsed : (parsed.data || parsed.text || parsed.content || data);
                                 if (typeof chunk === "string" && chunk.length > 0) {
                                     fullText += chunk;
                                     if (!assistantDiv) {

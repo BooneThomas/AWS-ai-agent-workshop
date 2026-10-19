@@ -55,7 +55,7 @@ def get_runtime_arn() -> str:
     resp = cf.describe_stacks(StackName=stack_name)
     outputs = resp["Stacks"][0]["Outputs"]
     for o in outputs:
-        if "RuntimeArn" in o["OutputKey"] and "CustomerSupport" in o["OutputKey"]:
+        if "RuntimeArn" in o["OutputKey"] and "CustomerSupport" in o["OutputKey"] and "AB" not in o["OutputKey"]:
             return o["OutputValue"]
     raise RuntimeError("Could not find CustomerSupport runtime ARN in stack outputs")
 
