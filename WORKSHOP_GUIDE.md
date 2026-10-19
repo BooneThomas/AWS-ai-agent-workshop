@@ -351,6 +351,10 @@ grep -c 'def get_return_policy\|def get_product_info\|def invoke\|def get_or_cre
 grep -c 'add_numbers' app/CustomerSupport/main.py
 ```
 
+At this point, your local architecture looks like this — an agent with two custom tools and an MCP-connected web search, all running on your machine:
+
+![Lab 1 — Local architecture](images/lab1_architecture_diagram.png)
+
 ### Step 4: Start the Local Dev Server
 
 ```bash
@@ -384,6 +388,10 @@ Once READY, invoke from the cloud:
 ```bash
 agentcore invoke "What can you do?"
 ```
+
+The architecture has shifted — your agent is now deployed to AgentCore Runtime in the cloud:
+
+![Lab 1 — Deployed architecture](images/lab1_updated_architecture_diagram.png)
 
 ---
 
@@ -468,6 +476,10 @@ Also add the custom header allowlist to `agentcore.json` runtime config:
     "X-Amzn-Bedrock-AgentCore-Runtime-Custom-User-Id"
 ]
 ```
+
+Updated architecture with AgentCore Memory integrated:
+
+![Lab 2 — Architecture with memory](images/lab2_architecture_diagram.png)
 
 ### Step 4: Deploy
 
@@ -625,6 +637,10 @@ agentcore deploy -y -v
 agentcore invoke "Check the warranty for PROD-002"
 ```
 
+Architecture with Gateway and Lambda-backed tools:
+
+![Lab 3 — Architecture with Gateway](images/lab3_architecture_diagram.png)
+
 ---
 
 ## Lab 4: Secure and Observe in Production
@@ -721,6 +737,10 @@ agentcore traces list
 agentcore logs
 ```
 
+Architecture with JWT authentication and observability:
+
+![Lab 4 — Secure and observable architecture](images/lab4_architecture_diagram.png)
+
 ---
 
 ## Lab 5: Evaluate Agent Performance
@@ -769,6 +789,10 @@ agentcore logs evals
 ```
 
 You can also view evaluation results in the AWS Console under Amazon Bedrock AgentCore → Online Evaluations.
+
+Architecture with continuous evaluation pipeline:
+
+![Lab 5 — Architecture with evaluations](images/lab5_architecture_diagram.png)
 
 ---
 
@@ -910,6 +934,14 @@ AWS_REGION=us-west-2 uv run python frontend.py
 
 Access at `http://localhost:8501`.
 
+The chat interface in action:
+
+![Lab 6 — Chat interface](images/lab6_chat_interface.png)
+
+Architecture with the customer-facing frontend:
+
+![Lab 6 — Architecture with frontend](images/lab6_architecture_diagram.png)
+
 ---
 
 ## Lab 7: Govern Agent Actions
@@ -974,6 +1006,10 @@ agentcore invoke "Process a refund of $200 for order ORD-456 because the item is
 agentcore invoke "Process a refund of $50 for order ORD-789 because I changed my mind" \
   -H "Authorization: Bearer $TOKEN" --session-id $(uuidgen)
 ```
+
+Architecture with Cedar policy governance:
+
+![Lab 7 — Architecture with policies](images/lab7_architecture_diagram.png)
 
 ---
 
@@ -1239,6 +1275,10 @@ HARNESS_ARN=$(cat /tmp/harness_arn.txt)
 python3 app/OrderResearchAgent/test_hitl.py --harness-arn $HARNESS_ARN
 ```
 
+Architecture with Harness agent:
+
+![Lab 8 — Architecture with Harness](images/lab8_architecture_diagram.png)
+
 ---
 
 ## Lab 9: Optimizing Agent Quality
@@ -1453,6 +1493,10 @@ agentcore invoke "Search the web for the latest Amazon Bedrock AgentCore feature
 ```
 
 The web search connector provides date-aware search capabilities and is fully managed by AWS — no API keys or external service accounts required.
+
+Final architecture with Web Search:
+
+![Lab 10 — Architecture with web search](images/lab10-websearch-architecture.png)
 
 ### Summary
 
