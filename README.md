@@ -227,6 +227,8 @@ Each layer builds on the previous, demonstrating how AgentCore handles the undif
 
 This project was built at the **Deloitte Student Innovation Summit 2026**, a collaborative event exploring the intersection of generative AI and enterprise-grade cloud infrastructure. The focus was on understanding the full lifecycle of deploying AI agents to production — moving beyond prompt engineering into the systems engineering challenges of authentication, governance, observability, and continuous optimization.
 
+![AWS Workshop Studio — Deloitte Student Innovation Summit 2026](images/workshop-studio-dashboard.png)
+
 ---
 
 ## License
