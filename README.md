@@ -32,48 +32,15 @@ What makes this more than a chatbot is the **production infrastructure** around 
 
 ## Architecture
 
-```
-                                    ┌──────────────────────────────────┐
-                                    │      Amazon Bedrock AgentCore    │
-                                    │                                  │
- ┌──────────┐    Cognito JWT   ┌────┴─────┐     ┌──────────────────┐  │
- │  Flask    │ ───────────────>│ AgentCore │     │  AgentCore       │  │
- │  Frontend │<─── streaming ──│ Runtime   │────>│  Memory          │  │
- └──────────┘                  └────┬──────┘     │  (Semantic +     │  │
-                                    │            │   Summarization) │  │
-                                    v            └──────────────────┘  │
-                              ┌───────────┐                           │
-                              │ AgentCore │    ┌───────────────────┐  │
-                              │ Gateway   │───>│ Cedar Policy      │  │
-                              │           │    │ Engine            │  │
-                              └─────┬─────┘    └───────────────────┘  │
-                                    │                                  │
-                      ┌─────────────┼─────────────┐                   │
-                      v             v             v                   │
-               ┌────────────┐ ┌──────────┐ ┌───────────┐             │
-               │ Warranty   │ │ Process  │ │ Web Search│             │
-               │ Check (λ)  │ │ Refund(λ)│ │ Connector │             │
-               └────────────┘ └──────────┘ └───────────┘             │
-                                                                      │
-               ┌──────────────────────────────────────────┐           │
-               │  Optimization Layer                      │           │
-               │  ┌─────────────┐  ┌───────────────────┐  │           │
-               │  │ Online Eval │  │ A/B Testing        │  │           │
-               │  │ (Quality    │  │ (Config Bundles +  │  │           │
-               │  │  Monitor)   │  │  Traffic Splitting)│  │           │
-               │  └─────────────┘  └───────────────────┘  │           │
-               └──────────────────────────────────────────┘           │
-                                                                      │
-               ┌──────────────────────────────────────────┐           │
-               │  Harness (Zero-Code Agent)               │           │
-               │  OrderResearchAgent                      │           │
-               │  - Code Interpreter + Shell Access       │           │
-               │  - Gateway Tool Integration              │           │
-               │  - Human-in-the-Loop Inline Functions    │           │
-               └──────────────────────────────────────────┘           │
-                                    │                                  │
-                                    └──────────────────────────────────┘
-```
+![Full system architecture](images/lab8_architecture_diagram.png)
+
+The system consists of two agent runtimes sharing a common infrastructure layer:
+
+- **CustomerSupport Agent** (Strands SDK) — Code-based agent with local tools, memory integration, and Gateway access
+- **OrderResearch Agent** (Harness) — Zero-code declarative agent with code interpreter, Gateway tools, and human-in-the-loop approval flows
+- **AgentCore Gateway** — Centralized tool routing with Cedar policy enforcement, connecting to Lambda functions (warranty check, refund processing) and web search
+- **AgentCore Memory** — Persistent semantic and summarization memory shared across agents
+- **Amazon Bedrock** — Claude Sonnet 4.6 foundation model via cross-region inference
 
 ---
 
