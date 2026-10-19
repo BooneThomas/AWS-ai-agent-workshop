@@ -30,6 +30,15 @@
           ]
         }
       }
+    },
+    {
+      "name": "CustomerSupportAB",
+      "build": "CodeZip",
+      "entrypoint": "main.py",
+      "codeLocation": "app/CustomerSupportAB/",
+      "runtimeVersion": "PYTHON_3_14",
+      "networkMode": "PUBLIC",
+      "protocol": "HTTP"
     }
   ],
   "memories": [
@@ -53,7 +62,17 @@
     }
   ],
   "knowledgeBases": [],
-  "credentials": [],
+  "credentials": [
+    {
+      "authorizerType": "OAuthCredentialProvider",
+      "name": "gateway-egress-oauth",
+      "discoveryUrl": "https://cognito-idp.us-west-2.amazonaws.com/us-west-2_PogjVJ9Sp/.well-known/openid-configuration",
+      "scopes": [
+        "default-m2m-resource-server-840f2660/read"
+      ],
+      "vendor": "CustomOauth2"
+    }
+  ],
   "evaluators": [],
   "onlineEvalConfigs": [
     {
@@ -63,6 +82,15 @@
         "Builtin.GoalSuccessRate",
         "Builtin.Correctness",
         "Builtin.ToolSelectionAccuracy"
+      ],
+      "samplingRate": 100,
+      "enableOnCreate": true
+    },
+    {
+      "name": "ABQualityMonitor",
+      "agent": "CustomerSupportAB",
+      "evaluators": [
+        "Builtin.GoalSuccessRate"
       ],
       "samplingRate": 100,
       "enableOnCreate": true
@@ -81,6 +109,21 @@
             "lambdaArn": "arn:aws:lambda:us-west-2:305999614267:function:workshop-warranty-check",
             "toolSchemaFile": "app/CustomerSupport/tool/warranty_schema.json"
           }
+        },
+        {
+          "name": "ProcessRefund",
+          "targetType": "lambdaFunctionArn",
+          "lambdaFunctionArn": {
+            "lambdaArn": "arn:aws:lambda:us-west-2:305999614267:function:workshop-process-refund",
+            "toolSchemaFile": "app/CustomerSupport/tool/refund_schema.json"
+          }
+        },
+        {
+          "name": "customer-support-ab",
+          "targetType": "httpRuntime",
+          "httpRuntime": {
+            "runtime": "CustomerSupportAB"
+          }
         }
       ],
       "authorizerType": "CUSTOM_JWT",
@@ -94,7 +137,11 @@
         }
       },
       "enableSemanticSearch": true,
-      "exceptionLevel": "NONE"
+      "exceptionLevel": "NONE",
+      "policyEngineConfiguration": {
+        "policyEngineName": "CustomerSupportPolicyEngine",
+        "mode": "ENFORCE"
+      }
     }
   ],
   "unassignedTargets": [
@@ -107,10 +154,79 @@
       }
     }
   ],
-  "policyEngines": [],
-  "configBundles": [],
+  "policyEngines": [
+    {
+      "name": "CustomerSupportPolicyEngine",
+      "description": "Governs customer support agent tool access — refund limits and tool permissions",
+      "policies": [
+        {
+          "name": "refund_limit_policy",
+          "description": "Allow refunds under 100 dollars only",
+          "statement": "permit(principal, action == AgentCore::Action::\"ProcessRefund___process_refund\", resource == AgentCore::Gateway::\"arn:aws:bedrock-agentcore:us-west-2:305999614267:gateway/customersupport-my-gateway-secure-1o87yftraq\") when { context.input.amount < 100 };",
+          "validationMode": "FAIL_ON_ANY_FINDINGS",
+          "enforcementMode": "ACTIVE",
+          "authorizationPhase": "INITIATE"
+        },
+        {
+          "name": "warranty_check_policy",
+          "description": "Allow all authenticated users to check warranties",
+          "statement": "permit(principal, action == AgentCore::Action::\"WarrantyCheck___check_warranty\", resource == AgentCore::Gateway::\"arn:aws:bedrock-agentcore:us-west-2:305999614267:gateway/customersupport-my-gateway-secure-1o87yftraq\") when { (principal is AgentCore::OAuthUser) };",
+          "validationMode": "IGNORE_ALL_FINDINGS",
+          "enforcementMode": "ACTIVE",
+          "authorizationPhase": "INITIATE"
+        },
+        {
+          "name": "refund_reason_policy",
+          "statement": "forbid (principal, action == AgentCore::Action::\"ProcessRefund___process_refund\", resource == AgentCore::Gateway::\"arn:aws:bedrock-agentcore:us-west-2:305999614267:gateway/customersupport-my-gateway-secure-1o87yftraq\")\nunless { context.input.reason like \"*defective*\" };",
+          "validationMode": "FAIL_ON_ANY_FINDINGS",
+          "enforcementMode": "ACTIVE",
+          "authorizationPhase": "INITIATE"
+        },
+        {
+          "name": "ab_permit_all",
+          "statement": "permit(principal, action, resource == AgentCore::Gateway::\"arn:aws:bedrock-agentcore:us-west-2:305999614267:gateway/customersupport-my-gateway-secure-1o87yftraq\") when { (principal is AgentCore::OAuthUser) };",
+          "validationMode": "IGNORE_ALL_FINDINGS",
+          "enforcementMode": "ACTIVE",
+          "authorizationPhase": "INITIATE"
+        }
+      ]
+    }
+  ],
+  "configBundles": [
+    {
+      "name": "customerSupportControl",
+      "type": "ConfigurationBundle",
+      "components": {
+        "{{runtime:CustomerSupportAB}}": {
+          "configuration": {
+            "system_prompt": "You are a helpful and professional customer support assistant for an e-commerce company. Provide accurate information using the tools available to you. Be friendly, patient, and understanding. Always offer additional help after answering. Always use tools to get accurate information rather than guessing."
+          }
+        }
+      },
+      "branchName": "mainline",
+      "commitMessage": "Baseline prompt"
+    },
+    {
+      "name": "customerSupportTreatment",
+      "type": "ConfigurationBundle",
+      "components": {
+        "{{runtime:CustomerSupportAB}}": {
+          "configuration": {
+            "system_prompt": "You are a helpful and professional customer support assistant for an e-commerce company. Be friendly, patient, and understanding. Always use tools to get accurate information rather than guessing. Always offer additional help after answering.\n\nWhen a user names a product without an ID, use get_product_info to find it—never ask for IDs you can search for. When listing capabilities, base them on available tools; never deny abilities your tools support.\n\nBefore processing refunds, check the return policy to verify eligibility. If a tool call is denied, explain clearly and suggest alternatives. When a request is ambiguous, ask for clarification.\n\nBefore any consequential action (refunds, purchases, account changes), state the plan and wait for explicit user approval. Do not treat silence as consent."
+          }
+        }
+      },
+      "branchName": "mainline",
+      "commitMessage": "Recommended prompt from cs-prompt-rec"
+    }
+  ],
   "abTests": [],
-  "harnesses": [],
+  "harnesses": [
+    {
+      "name": "OrderResearchAgent",
+      "path": "app/OrderResearchAgent"
+    }
+  ],
   "datasets": [],
   "capacityProviders": [],
   "payments": []
