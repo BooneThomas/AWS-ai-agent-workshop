@@ -2,7 +2,7 @@
 
 An end-to-end AI-powered customer support agent built with [Amazon Bedrock AgentCore](https://aws.amazon.com/bedrock/agentcore/) and the [Strands Agents SDK](https://github.com/strands-agents/sdk-python), deployed as a fully managed, serverless production system on AWS.
 
-Built during the **Deloitte Student Innovation Summit 2026** in collaboration with AWS.
+Built during the **Deloitte Student Innovation Summit 2026** in collaboration with **AWS** Solutions Architects.
 
 ---
 
@@ -228,6 +228,8 @@ Each layer builds on the previous, demonstrating how AgentCore handles the undif
 This project was built at the **Deloitte Student Innovation Summit 2026**, a collaborative event exploring the intersection of generative AI and enterprise-grade cloud infrastructure. The focus was on understanding the full lifecycle of deploying AI agents to production — moving beyond prompt engineering into the systems engineering challenges of authentication, governance, observability, and continuous optimization.
 
 ![AWS Workshop Studio — Deloitte Student Innovation Summit 2026](images/workshop-studio-dashboard.png)
+
+![Deloitte AI Masterclass Certificate — Build Your Own AI Agent](images/deloitte-certificate.png)
 
 ---
 
