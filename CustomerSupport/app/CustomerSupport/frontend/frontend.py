@@ -41,8 +41,8 @@ def authenticate() -> str:
         AuthFlow="USER_PASSWORD_AUTH",
         ClientId=web_client_id,
         AuthParameters={
-            "USERNAME": "workshopuser@example.com",
-            "PASSWORD": "WorkshopPass1!",
+            "USERNAME": os.environ.get("COGNITO_USERNAME", "workshopuser@example.com"),
+            "PASSWORD": os.environ["COGNITO_PASSWORD"],
         },
     )
     return resp["AuthenticationResult"]["AccessToken"]

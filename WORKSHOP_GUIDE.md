@@ -719,7 +719,7 @@ agentcore deploy -y -v
 TOKEN=$(aws cognito-idp initiate-auth \
   --auth-flow USER_PASSWORD_AUTH \
   --client-id $MACHINE_CLIENT \
-  --auth-parameters USERNAME=workshopuser@example.com,PASSWORD=WorkshopPass1! \
+  --auth-parameters USERNAME=<your-cognito-username>,PASSWORD=<your-cognito-password> \
   --query 'AuthenticationResult.AccessToken' --output text)
 
 agentcore invoke "What can you do?" \
@@ -858,8 +858,8 @@ def authenticate() -> str:
         AuthFlow="USER_PASSWORD_AUTH",
         ClientId=web_client_id,
         AuthParameters={
-            "USERNAME": "workshopuser@example.com",
-            "PASSWORD": "WorkshopPass1!",
+            "USERNAME": os.environ.get("COGNITO_USERNAME", "workshopuser@example.com"),
+            "PASSWORD": os.environ["COGNITO_PASSWORD"],
         },
     )
     return resp["AuthenticationResult"]["AccessToken"]
